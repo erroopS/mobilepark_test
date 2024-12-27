@@ -29,6 +29,8 @@ export class Store {
   locations: Location[] = [];
   envs: Env[] = [];
   servers: Server[] = [];
+  locationID: number | null = null;
+  envID: number | null = null;
 
   fetchData = async () => {
     await sleep(3000);
@@ -43,6 +45,33 @@ export class Store {
   constructor() {
     makeAutoObservable(this);
   }
+  setLocationID(id: number | null) {
+    this.locationID = id;
+  }
+  setEnvID(id: number | null) {
+    this.envID = id;
+  }
+
+  get filteredEnvs() {
+    if (this.locationID === null) return [];
+    const serversLocation = this.servers.filter(
+      (s) => s.locationID === this.locationID
+    );
+    const envIDs = serversLocation.map((s) => s.envID);
+    return this.envs.filter((e) => envIDs.includes(e.envID));
+  }
+
+  filteredServers(locationID: number | null, envID: number | null) {
+    if (locationID === null || envID === null) return [];
+    return this.servers.filter(
+      (s) => s.locationID === locationID && s.envID === envID
+    );
+  }
+  resetFilteredServers() {
+    this.locationID = null;
+    this.envID = null;
+  }
+  
 }
 
 export const store = new Store();
